@@ -29,8 +29,8 @@ public class ProcessingSetup extends PApplet {
         app.keyPressed(this);
     }
     public static void main(String[] args) {
-        //app = new DLA();
-        app = new JogoDaVidaProcessing();
+        app = new DLA();
+        //app = new JogoDaVidaProcessing();
         PApplet.main(ProcessingSetup.class.getName());
     }
 }

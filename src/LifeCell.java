@@ -29,7 +29,8 @@ public class LifeCell extends Cell
 	public void countAlives()
 	{
 		nAlives = 0;
-		for (Cell c : neighbors) nAlives += c.state;
+		for (Cell c : neighbors) 
+			nAlives += c.state;
 		nAlives -= state;
 	}
 
@@ -37,7 +38,8 @@ public class LifeCell extends Cell
 	{
 		nextState = state;
 		if (state == 0 && nAlives == 3) nextState = 1;
-		if (state == 1 && (nAlives < 2 || nAlives > 3)) nextState = 0;
+		if (state == 1 && (nAlives < 2 || nAlives > 3))
+			nextState = 0;
 	}
 
 	public void applyNextState()
