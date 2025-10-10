@@ -5,7 +5,7 @@ public class ProcessingSetup extends PApplet {
     private float lastUpdateTime;
 
     public void settings(){
-        size(800, 600);
+        size(1280, 720);
     }
 
     public void setup(){
