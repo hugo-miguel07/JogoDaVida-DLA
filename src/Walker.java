@@ -14,6 +14,7 @@ public class Walker {
     private State state;
     private int colour;
     private static int radius = 1;
+    private int aggregationOrder;
 
     public Walker(PApplet p)
     {
@@ -23,12 +24,22 @@ public class Walker {
         pos.add(d.mult(p.height / 2));
 
         setState(p, State.WANDER);
+        aggregationOrder = 0;
     }
 
     public Walker(PApplet p, PVector pos) {
         this.pos = pos;
 
         setState(p, State.STOPPED);
+        aggregationOrder = 0;
+    }
+
+    public int getAggregationOrder() {
+        return aggregationOrder;
+    }
+
+    public void setAggregationOrder(int order) {
+        this.aggregationOrder = order;
     }
 
     public void setState(PApplet p, State state)
@@ -36,13 +47,21 @@ public class Walker {
         this.state = state;
         if (state == State.STOPPED)
         {
-            colour = p.color(0);
+            // Color based on aggregation order - gradient from blue to red
+            float hue = PApplet.map(aggregationOrder, 0, 500, 200, 0);
+            p.colorMode(PApplet.HSB, 360, 100, 100);
+            colour = p.color(hue, 80, 90);
+            p.colorMode(PApplet.RGB, 255, 255, 255);
         }
         else
         {
             colour = p.color(255);
         }
 
+    }
+
+    public PVector getPos() {
+        return pos;
     }
 
     public State getState()

@@ -2,8 +2,10 @@ import processing.core.PApplet;
 
 public class JogoDaVidaProcessing implements IProcessingApp {
 	/**
-	 * Press SPACE BAR to pause and toggle cells with the mouse.
-	 * Press 'R' to randomize the grid and 'C' to clear it.
+	 *SPACE BAR 	- pausa o jogo
+	 *mouseClick 	- colocar e retirar celulas
+	 *R 			- randomize na grid
+	 *C 			- limpar a grid
 	 */
 
 	private static final int NUMBER_OF_STATES = 2;
