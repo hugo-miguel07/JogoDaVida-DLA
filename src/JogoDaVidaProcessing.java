@@ -12,7 +12,7 @@ public class JogoDaVidaProcessing implements IProcessingApp {
 	private static final int NEIGHBOR_RADIUS = 1;
 
 	private int cellSize = 10;
-	private float probabilityOfAliveAtStart = 15f;
+	private float probabilityOfAliveAtStart = 0f;
 	private int interval = 100;
 	private int lastRecordedTime = 0;
 	private boolean pause = false;

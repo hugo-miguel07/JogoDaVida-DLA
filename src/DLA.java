@@ -2,31 +2,43 @@ import java.util.ArrayList;
 import java.util.List;
 
 import processing.core.PApplet;
-import processing.core.PVector;
 
 public class DLA implements IProcessingApp 
 {
-    private int NUM_WALKERS = 500;
-    private int NUM_STEPS_PER_FRAME = 100;
-    private List<Walker> walkers;
+    private int NUM_WALKERS = 100;
+    private int NUM_STEPS_PER_FRAME = 10;
+    private int cellSize = 5;
+    private int nrows, ncols;
+    
+    private List<Walker> wanderingWalkers;
+    private int[][] grid; // 0 = empty, >0 = aggregation order
     private int aggregationCounter;
     
     @Override
     public void setup(PApplet parent) 
     {
-        walkers = new ArrayList<Walker>();
+        parent.noStroke();
+        
+        ncols = parent.width / cellSize;
+        nrows = parent.height / cellSize;
+        
+        grid = new int[nrows][ncols];
+        wanderingWalkers = new ArrayList<Walker>();
         aggregationCounter = 0;
         
         // Create the seed particle at the center
-        Walker w = new Walker(parent, new PVector(parent.width / 2, parent.height / 2));
-        w.setAggregationOrder(aggregationCounter++);
-        walkers.add(w);
+        int centerRow = nrows / 2;
+        int centerCol = ncols / 2;
+        aggregationCounter++;
+        grid[centerRow][centerCol] = aggregationCounter;
+        
+
         
         // Create initial wandering particles
-        for (int i=0; i<NUM_WALKERS;i++)
+        for (int i = 0; i < NUM_WALKERS; i++)
         {
-            w = new Walker(parent);
-            walkers.add(w);
+            Walker w = new Walker(parent, cellSize, nrows, ncols);
+            wanderingWalkers.add(w);
         }
     }
 
@@ -35,30 +47,55 @@ public class DLA implements IProcessingApp
     {
         parent.background(200);
 
+        List<Walker> toRemove = new ArrayList<Walker>();
+        
         for (int i = 0; i < NUM_STEPS_PER_FRAME; i++)
         {
-            for (int j = 0; j < walkers.size(); j++) {
-                Walker w = walkers.get(j);
-                if (w.getState() == Walker.State.WANDER)
-                {
-                    w.wander(parent);
-                    Walker.State previousState = w.getState();
-                    w.updateState(parent, walkers);
+            for (Walker w : wanderingWalkers) {
+                w.wander(parent);
+                w.updateState(parent, grid);
+                
+                // Check if walker just stopped
+                if (w.getState() == Walker.State.STOPPED) {
+                    aggregationCounter++;
                     
-                    // If walker just stopped, create a new one to maintain constant count
-                    if (previousState == Walker.State.WANDER && w.getState() == Walker.State.STOPPED) {
-                        w.setAggregationOrder(aggregationCounter++);
-                        w.setState(parent, Walker.State.STOPPED); // Update color based on order
-                        
-                        // Spawn a new wandering walker
-                        Walker newWalker = new Walker(parent);
-                        walkers.add(newWalker);
-                    }
-                }  
+                    // Mark cell as occupied in grid with aggregation order
+                    grid[w.getRow()][w.getCol()] = aggregationCounter;
+                    toRemove.add(w);
+                }
             }
+            
+            // Remove stopped walkers from wandering list
+            wanderingWalkers.removeAll(toRemove);
+            
+            // Respawn new walkers to maintain constant count
+            while (wanderingWalkers.size() < NUM_WALKERS) {
+                Walker newWalker = new Walker(parent, cellSize, nrows, ncols);
+                wanderingWalkers.add(newWalker);
+            }
+            
+            toRemove.clear();
         }
 
-        for (Walker w : walkers) {
+        // Display grid (stopped walkers with colors based on aggregation order)
+        for (int r = 0; r < nrows; r++) {
+            for (int c = 0; c < ncols; c++) {
+                if (grid[r][c] > 0) {
+                    int order = grid[r][c];
+                    
+                    // Color gradient with cycle (repeats every 10 particles)
+                    float hue = PApplet.map(order, 0, 800, 200, 0);
+                    parent.colorMode(PApplet.HSB, 360, 100, 100);
+                    parent.fill(hue, 80, 90);
+                    parent.colorMode(PApplet.RGB, 255, 255, 255);
+                    
+                    parent.rect(c * cellSize, r * cellSize, cellSize, cellSize);
+                }
+            }
+        }
+        
+        // Display wandering walkers
+        for (Walker w : wanderingWalkers) {
             w.display(parent);
         }
         
@@ -66,12 +103,10 @@ public class DLA implements IProcessingApp
 
     @Override
     public void keyPressed(PApplet parent) {
-        // Empty implementation - no special key handling needed
     }
 
     @Override
     public void mousePressed(PApplet parent) {
-        // Empty implementation - no mouse interaction needed
     }
     
 }
