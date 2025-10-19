@@ -74,7 +74,7 @@ public class JogoDaVidaProcessing implements IProcessingApp {
 		}
 		else if (parent.key == 'b' || parent.key == 'B')
 		{
-			automata.setRule(true);
+			automata.setRule(!automata.getRule());
 		}
 	}
 
