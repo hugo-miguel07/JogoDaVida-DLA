@@ -7,6 +7,7 @@ public class CellularAutomata
 	protected Cell[][] cells;
 	protected int radius;
 	protected boolean moore;
+	protected boolean ruleSwitch;
 	protected int numberOfStates;
 	protected int[] colors;
 	protected PApplet p;
@@ -118,6 +119,16 @@ public class CellularAutomata
 				cells[i][j].setState((int) p.random(numberOfStates));
 			}
 		}
+	}
+
+	public void setRule(boolean rule)
+	{
+		this.ruleSwitch = rule;
+	}
+
+	public boolean getRule()
+	{
+		return ruleSwitch;
 	}
 
 	/*public void setRandomStatesCustom(double[] pmf) {

@@ -1,21 +1,15 @@
 import processing.core.PApplet;
 
 public class JogoDaVidaProcessing implements IProcessingApp {
-	/**
-	 *SPACE BAR 	- pausa o jogo
-	 *mouseClick 	- colocar e retirar celulas
-	 *R 			- randomize na grid
-	 *C 			- limpar a grid
-	 */
 
 	private static final int NUMBER_OF_STATES = 2;
 	private static final int NEIGHBOR_RADIUS = 1;
 
 	private int cellSize = 10;
-	private float probabilityOfAliveAtStart = 0f;
+	private float probabilityOfAliveAtStart = 10f;
 	private int interval = 100;
 	private int lastRecordedTime = 0;
-	private boolean pause = false;
+	private boolean pause = true;
 	private LifeAutomata automata;
 	private int[] stateColors;
 
@@ -31,8 +25,6 @@ public class JogoDaVidaProcessing implements IProcessingApp {
 		automata = new LifeAutomata(parent, nrows, ncols, NEIGHBOR_RADIUS);
 		stateColors = new int[] { parent.color(0), parent.color(0, 200, 0) };
 		automata.setStateColors(stateColors);
-		automata.randomize(probabilityOfAliveAtStart);
-
 		lastRecordedTime = parent.millis();
 	}
 
@@ -47,6 +39,19 @@ public class JogoDaVidaProcessing implements IProcessingApp {
 			automata.step();
 			lastRecordedTime = parent.millis();
 		}
+
+		//Escrever as coisas la em cima
+		parent.fill(255, 0, 0);
+		parent.textSize(20);
+				
+		String ruleText = "Rule: " + (automata.getRule() ? "23/36 (HighLife)" : "23/3 (Conway)");
+		String statusText = pause ? "PAUSA" : "A CORRER";
+		
+		parent.text(ruleText + " " + statusText, 10, 25);
+		
+		parent.textSize(12);
+		parent.fill(200);
+		parent.text("SPACE=Pausar | B=Trocar Regra | R=Random | C=Clear", 10, 40);
 	}
 
 	@Override
@@ -57,7 +62,8 @@ public class JogoDaVidaProcessing implements IProcessingApp {
 			pause = !pause;
 			return;
 		}
-
+		if (!pause)
+			return;
 		if (parent.key == 'r' || parent.key == 'R')
 		{
 			automata.randomize(probabilityOfAliveAtStart);
@@ -65,6 +71,10 @@ public class JogoDaVidaProcessing implements IProcessingApp {
 		else if (parent.key == 'c' || parent.key == 'C')
 		{
 			automata.clear();
+		}
+		else if (parent.key == 'b' || parent.key == 'B')
+		{
+			automata.setRule(true);
 		}
 	}
 
@@ -85,6 +95,7 @@ public class JogoDaVidaProcessing implements IProcessingApp {
 		public LifeAutomata(PApplet p, int nrows, int ncols, int radius)
 		{
 			super(p, nrows, ncols, radius, NUMBER_OF_STATES);
+			this.setRule(false);
 		}
 
 		@Override
@@ -129,7 +140,10 @@ public class JogoDaVidaProcessing implements IProcessingApp {
 
 			for (int i = 0; i < nrows; i++) {
 				for (int j = 0; j < ncols; j++) {
-					((LifeCell) cells[i][j]).planNextState();
+					if (getRule())
+						((LifeCell) cells[i][j]).planNextState2336();
+					else
+						((LifeCell) cells[i][j]).planNextState();
 				}
 			}
 

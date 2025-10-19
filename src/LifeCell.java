@@ -42,6 +42,14 @@ public class LifeCell extends Cell
 			nextState = 0;
 	}
 
+	public void planNextState2336()
+	{
+		nextState = state;
+		if (state == 0 && (nAlives == 3 || nAlives == 6)) nextState = 1;
+		if (state == 1 && (nAlives != 2 && nAlives != 3))
+			nextState = 0;
+	}
+
 	public void applyNextState()
 	{
 		state = nextState;
