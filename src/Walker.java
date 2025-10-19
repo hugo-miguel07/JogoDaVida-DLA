@@ -7,7 +7,7 @@ public class Walker {
         WANDER
     }
 
-    private int row, col;  // Grid position instead of continuous position
+    private int row, col;
     private State state;
     private int colour;
     private int cellSize;
@@ -20,11 +20,9 @@ public class Walker {
         this.nrows = nrows;
         this.ncols = ncols;
         
-        // Start at center
         this.row = nrows / 2;
         this.col = ncols / 2;
         
-        // Random position on edge
         int edge = (int)p.random(4);
         if (edge == 0) { // Top
             row = 0;
@@ -68,7 +66,7 @@ public class Walker {
         this.state = state;
         if (state == State.STOPPED)
         {
-            // Color based on aggregation order - faster transition (reaches red at 50 particles)
+            // Cena da Cor
             float hue = PApplet.map(aggregationOrder, 0, 10, 200, 0);
             p.colorMode(PApplet.HSB, 360, 100, 100);
             colour = p.color(hue, 80, 90);
@@ -96,48 +94,40 @@ public class Walker {
 
     public void wander(PApplet p)
     {
-        // Calculate direction toward center
         int centerRow = nrows / 2;
         int centerCol = ncols / 2;
         
         float biasStrength = 0.015f;
         
         if (p.random(1) < biasStrength) {
-            // Move toward center
             int dRow = centerRow - row;
             int dCol = centerCol - col;
             
-            // Choose whether to move in row or col direction
+            //Check para saber como anda na coluna ou na linha
             if (Math.abs(dRow) > Math.abs(dCol)) {
-                // Move vertically toward center
-                if (dRow > 0) row++; // Move down
-                else if (dRow < 0) row--; // Move up
+                if (dRow > 0) row++;
+                else if (dRow < 0) row--;
                 else {
-                    // Already aligned vertically, move horizontally
                     if (dCol > 0) col++;
                     else if (dCol < 0) col--;
                 }
             } else {
-                // Move horizontally toward center
-                if (dCol > 0) col++; // Move right
-                else if (dCol < 0) col--; // Move left
+                if (dCol > 0) col++;
+                else if (dCol < 0) col--;
                 else {
-                    // Already aligned horizontally, move vertically
                     if (dRow > 0) row++;
                     else if (dRow < 0) row--;
                 }
             }
         } else {
-            // Random walk in 4 directions
             int dir = (int)p.random(4);
             
-            if (dir == 0) row--; // Up
-            else if (dir == 1) row++; // Down
-            else if (dir == 2) col--; // Left
-            else col++; // Right
+            if (dir == 0) row--;
+            else if (dir == 1) row++;
+            else if (dir == 2) col--;
+            else col++;
         }
         
-        // Wrap around edges
         if (row < 0) row = nrows - 1;
         if (row >= nrows) row = 0;
         if (col < 0) col = ncols - 1;
@@ -146,15 +136,15 @@ public class Walker {
 
     public void updateState(PApplet p, int[][] grid)
     {
-        // Check Moore neighborhood (8 neighbors)
+        //Von Neuman
         for (int dr = -1; dr <= 1; dr++) {
             for (int dc = -1; dc <= 1; dc++) {
-                if (dr == dc || -dr == dc) continue; // Skip self
+                if (dr == dc || -dr == dc) continue;
                 
                 int checkRow = (row + dr + nrows) % nrows;
                 int checkCol = (col + dc + ncols) % ncols;
                 
-                if (grid[checkRow][checkCol] > 0) { // Cell is occupied
+                if (grid[checkRow][checkCol] > 0) {
                     setState(p, State.STOPPED);
                     return;
                 }

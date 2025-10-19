@@ -5,8 +5,8 @@ import processing.core.PApplet;
 
 public class DLA implements IProcessingApp 
 {
-    private int NUM_WALKERS = 100;
-    private int NUM_STEPS_PER_FRAME = 10;
+    private int NUM_WALKERS = 200;
+    private int NUM_STEPS_PER_FRAME = 20;
     private int cellSize = 5;
     private int nrows, ncols;
     private boolean start = false;
@@ -32,10 +32,7 @@ public class DLA implements IProcessingApp
         int centerCol = ncols / 2;
         aggregationCounter++;
         grid[centerRow][centerCol] = aggregationCounter; */
-        
 
-        
-        // Create initial wandering particles
         for (int i = 0; i < NUM_WALKERS; i++)
         {
             Walker w = new Walker(parent, cellSize, nrows, ncols);
@@ -97,7 +94,7 @@ public class DLA implements IProcessingApp
                     int order = grid[r][c];
                     
                     //Codigo do Gradiante de Cor
-                    float hue = PApplet.map(order, 0, 800, 200, 0);
+                    float hue = PApplet.map(order, 0, 1000, 200, 0);
                     parent.colorMode(PApplet.HSB, 360, 100, 100);
                     parent.fill(hue, 80, 90);
                     parent.colorMode(PApplet.RGB, 255, 255, 255);
