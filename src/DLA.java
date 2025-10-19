@@ -9,9 +9,10 @@ public class DLA implements IProcessingApp
     private int NUM_STEPS_PER_FRAME = 10;
     private int cellSize = 5;
     private int nrows, ncols;
+    private boolean start = false;
     
     private List<Walker> wanderingWalkers;
-    private int[][] grid; // 0 = empty, >0 = aggregation order
+    private int[][] grid;
     private int aggregationCounter;
     
     @Override
@@ -27,10 +28,10 @@ public class DLA implements IProcessingApp
         aggregationCounter = 0;
         
         // Create the seed particle at the center
-        int centerRow = nrows / 2;
+        /* int centerRow = nrows / 2;
         int centerCol = ncols / 2;
         aggregationCounter++;
-        grid[centerRow][centerCol] = aggregationCounter;
+        grid[centerRow][centerCol] = aggregationCounter; */
         
 
         
@@ -47,6 +48,23 @@ public class DLA implements IProcessingApp
     {
         parent.background(200);
 
+        if (!this.start)
+        {
+            //Escrever as coisas la em cima
+		    parent.fill(40, 40, 40);
+		    parent.textSize(24);
+				
+		    String statusText = this.start ? "A CORRER" : "ESCOLHA";
+		
+            parent.text(statusText, parent.width/2 - 70, 30);
+            
+            parent.textSize(16);
+            parent.fill(20);
+            parent.text("SPACE=1 cell centro | C=Circulo |"
+                + " Q=Quadrado | L=linha", parent.width/2 - 240, 50);
+            return ;
+        }
+
         List<Walker> toRemove = new ArrayList<Walker>();
         
         for (int i = 0; i < NUM_STEPS_PER_FRAME; i++)
@@ -55,20 +73,16 @@ public class DLA implements IProcessingApp
                 w.wander(parent);
                 w.updateState(parent, grid);
                 
-                // Check if walker just stopped
                 if (w.getState() == Walker.State.STOPPED) {
                     aggregationCounter++;
                     
-                    // Mark cell as occupied in grid with aggregation order
                     grid[w.getRow()][w.getCol()] = aggregationCounter;
                     toRemove.add(w);
                 }
             }
             
-            // Remove stopped walkers from wandering list
             wanderingWalkers.removeAll(toRemove);
             
-            // Respawn new walkers to maintain constant count
             while (wanderingWalkers.size() < NUM_WALKERS) {
                 Walker newWalker = new Walker(parent, cellSize, nrows, ncols);
                 wanderingWalkers.add(newWalker);
@@ -77,13 +91,12 @@ public class DLA implements IProcessingApp
             toRemove.clear();
         }
 
-        // Display grid (stopped walkers with colors based on aggregation order)
         for (int r = 0; r < nrows; r++) {
             for (int c = 0; c < ncols; c++) {
                 if (grid[r][c] > 0) {
                     int order = grid[r][c];
                     
-                    // Color gradient with cycle (repeats every 10 particles)
+                    //Codigo do Gradiante de Cor
                     float hue = PApplet.map(order, 0, 800, 200, 0);
                     parent.colorMode(PApplet.HSB, 360, 100, 100);
                     parent.fill(hue, 80, 90);
@@ -94,7 +107,6 @@ public class DLA implements IProcessingApp
             }
         }
         
-        // Display wandering walkers
         for (Walker w : wanderingWalkers) {
             w.display(parent);
         }
@@ -103,10 +115,96 @@ public class DLA implements IProcessingApp
 
     @Override
     public void keyPressed(PApplet parent) {
+        if (!start)
+        {
+            if (parent.key == ' ')
+            {
+               this.start = !start;
+                createCenterParticle(); 
+            }
+            else if (parent.key == 'C' || parent.key == 'c')
+            {
+                this.start = !start;
+                createCircle();
+            }
+            else if (parent.key == 'Q' || parent.key == 'q')
+            {
+                this.start = !start;
+                createSquare();
+            }
+            else if (parent.key == 'L' || parent.key == 'l')
+            {
+                this.start = !start;
+                createLine();
+            }
+        }
     }
 
     @Override
     public void mousePressed(PApplet parent) {
     }
     
+    void createCenterParticle()
+    {
+       int centerRow = nrows / 2;
+        int centerCol = ncols / 2;
+        this.aggregationCounter++;
+        this.grid[centerRow][centerCol] = this.aggregationCounter; 
+    }
+
+    void createSquare()
+    {
+        int centerRow = nrows / 2;
+        int centerCol = ncols / 2;
+        this.aggregationCounter++;
+        for (int i = 0; i < 10; i++)
+        {
+            this.grid[centerRow - 5 + i][centerCol - 5] = this.aggregationCounter;
+            this.grid[centerRow - 5 + i][centerCol + 5] = this.aggregationCounter;
+        }
+        for (int i = 0; i < 10; i++)
+        {
+            this.grid[centerRow - 5][centerCol - 5 + i] = this.aggregationCounter;
+            this.grid[centerRow + 5][centerCol - 5 + i] = this.aggregationCounter;
+        }
+        this.grid[centerRow + 5][centerCol + 5] = this.aggregationCounter; 
+    }
+
+    void createLine()
+    {
+        int centerRow = nrows / 2;
+        int centerCol = ncols / 2;
+        this.aggregationCounter++;
+        for (int i = 0; i <= 16; i++)
+            this.grid[centerRow][centerCol + 8 - i] = this.aggregationCounter;
+    }
+
+    void createCircle()
+    {
+        int centerRow = nrows / 2;
+        int centerCol = ncols / 2;
+        int raio = 7;
+        
+        this.aggregationCounter++;
+        
+        for (int row = centerRow - raio; row <= centerRow + raio; row++)
+        {
+            for (int col = centerCol - raio; col <= centerCol + raio; col++)
+            {
+                //Distacia do centro
+                int dr = row - centerRow;
+                int dc = col - centerCol;
+                double distance = Math.sqrt(dr * dr + dc * dc);
+                
+                //if distancia for aproximadamente igual ao raio, pinta a particula
+                if (distance >= raio - 0.5 && distance <= raio + 0.5)
+                {
+                    if (row >= 0 && row < nrows && col >= 0 && col < ncols)
+                    {
+                        this.grid[row][col] = this.aggregationCounter;
+                    }
+                }
+            }
+        }
+    }
 }
